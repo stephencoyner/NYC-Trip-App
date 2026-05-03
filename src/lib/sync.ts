@@ -40,7 +40,11 @@ export async function pushCapture(cap: Capture, userId: string): Promise<void> {
       const { error } = await supabase.storage
         .from(BUCKET)
         .upload(path, blob, { upsert: true, contentType: blob.type || "image/jpeg" });
-      if (!error) photoPath = path;
+      if (error) {
+        console.error("[sync] photo upload failed:", error);
+      } else {
+        photoPath = path;
+      }
     }
   }
 
@@ -52,13 +56,21 @@ export async function pushCapture(cap: Capture, userId: string): Promise<void> {
       const { error } = await supabase.storage
         .from(BUCKET)
         .upload(path, blob, { upsert: true, contentType: blob.type || "audio/webm" });
-      if (!error) voicePath = path;
+      if (error) {
+        console.error("[sync] voice upload failed:", error);
+      } else {
+        voicePath = path;
+      }
     }
   }
 
   const merged: Capture = { ...cap, photoPath, voicePath };
-  const { error } = await supabase.from("captures").upsert(rowFromCapture(merged, userId));
-  if (error) throw error;
+  const row = rowFromCapture(merged, userId);
+  const { error } = await supabase.from("captures").upsert(row);
+  if (error) {
+    console.error("[sync] captures upsert failed:", error, "row:", row);
+    throw error;
+  }
 
   await updateCapture(cap.id, { photoPath, voicePath, synced: true });
 }

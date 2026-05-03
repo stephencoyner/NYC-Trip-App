@@ -125,7 +125,13 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     void requestPersistentStorage();
     // Mirror to Supabase if signed in. Fire-and-forget — local save is what
     // the user feels; the cloud copy follows in the background.
-    if (user) void pushCapture(cap, user.id).catch(() => {});
+    // Don't swallow errors silently — log them so the browser console
+    // makes failures visible.
+    if (user) {
+      void pushCapture(cap, user.id).catch((err) => {
+        console.error("[sync] pushCapture failed:", err);
+      });
+    }
     if ("vibrate" in navigator) navigator.vibrate?.(8);
     onSaved();
     onClose();
