@@ -91,8 +91,13 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
     >
       <Masthead day={day} isToday={isToday} dayIndex={activeDayIndex} total={DAYS.length} />
 
-      {greeting && isToday && (
+      {isToday && greeting && (
         <p className="px-6 -mt-2 mb-2 font-serif italic text-ink-2 text-[15px]">{greeting}</p>
+      )}
+      {!isToday && (
+        <p className="px-6 -mt-2 mb-2 font-serif italic text-ink-2 text-[15px]">
+          {relativeLabel(day.date, now)}
+        </p>
       )}
 
       {isToday && <NowBar day={day} now={now} />}
@@ -176,4 +181,21 @@ function greetingFor(now: Date): string {
   if (h < 17) return "The afternoon.";
   if (h < 19) return "Golden hour, if there is one.";
   return "Tonight.";
+}
+
+function relativeLabel(activeDate: string, now: Date): string {
+  // Compare calendar days in NY (matches dayKey logic).
+  const today = dayKey(now);
+  if (activeDate === today) return "";
+  const diff = Math.round(
+    (new Date(`${activeDate}T12:00:00-04:00`).getTime() -
+      new Date(`${today}T12:00:00-04:00`).getTime()) /
+      86_400_000
+  );
+  if (diff === 1) return "Tomorrow.";
+  if (diff === -1) return "Yesterday.";
+  if (diff > 1 && diff <= 6) return `In ${diff} days.`;
+  if (diff < -1 && diff >= -6) return `${Math.abs(diff)} days ago.`;
+  if (diff > 6) return "Soon.";
+  return "Past.";
 }

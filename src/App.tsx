@@ -46,12 +46,12 @@ export default function App() {
         now={now}
         activeDayIndex={active}
         setActiveDayIndex={setActive}
-        todayIndex={todayIndex < 0 ? 0 : todayIndex}
+        todayIndex={todayIndex}
         onOpenRecap={() => setRecapOpen(true)}
       />
       <DayPips
         active={active}
-        todayIndex={todayIndex < 0 ? -1 : todayIndex}
+        todayIndex={todayIndex}
         onSelect={setActive}
       />
     </main>
