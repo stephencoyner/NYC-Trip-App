@@ -44,8 +44,6 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     setCompanions([]);
     loadRecentMoods().then(setRecent);
     loadSettings().then((s) => setAllCompanions(s.companions));
-    // Auto-open camera on first open of the sheet (mobile only).
-    setTimeout(() => fileRef.current?.click?.(), 120);
   }, [open]);
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {

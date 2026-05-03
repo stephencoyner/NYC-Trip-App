@@ -1,5 +1,5 @@
 import React from "react";
-import { CameraIcon } from "./icons";
+import { PlusIcon } from "./icons";
 
 type Props = { onClick: () => void };
 
@@ -10,10 +10,10 @@ export function CaptureFAB({ onClick }: Props) {
         onClick();
         if ("vibrate" in navigator) navigator.vibrate?.(8);
       }}
-      aria-label="Capture"
+      aria-label="New entry"
       className="no-print fixed bottom-[72px] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-paper ring-1 ring-ink/70 active:scale-[0.97] transition-transform duration-150 ease-ios"
     >
-      <CameraIcon size={22} className="text-ink" />
+      <PlusIcon size={22} strokeWidth={1.5} className="text-ink" />
     </button>
   );
 }
