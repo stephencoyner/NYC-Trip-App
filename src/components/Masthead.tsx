@@ -2,14 +2,22 @@ import React from "react";
 import { Day, TRIP } from "../data/itinerary";
 import { WeatherGlyph } from "./icons";
 import { deviceIsInNY, deviceTZAbbr, offsetFromNYHours } from "../lib/time";
+import { useAuth } from "../hooks/useAuth";
 
-type Props = { day: Day; isToday: boolean; dayIndex: number; total: number };
+type Props = {
+  day: Day;
+  isToday: boolean;
+  dayIndex: number;
+  total: number;
+  onOpenAuth?: () => void;
+};
 
-export function Masthead({ day, isToday, dayIndex, total }: Props) {
+export function Masthead({ day, isToday, dayIndex, total, onOpenAuth }: Props) {
   const inNY = deviceIsInNY();
   const abbr = deviceTZAbbr();
   const off = offsetFromNYHours();
   const offLabel = off === 0 ? "" : off > 0 ? `NY −${off}` : `NY +${Math.abs(off)}`;
+  const { user, supabaseEnabled } = useAuth();
   return (
     <header className="relative px-6 pt-12 pb-6">
       {isToday && (
@@ -54,6 +62,27 @@ export function Masthead({ day, isToday, dayIndex, total }: Props) {
             </>
           )}
         </p>
+      )}
+
+      {supabaseEnabled && onOpenAuth && (
+        <button
+          onClick={onOpenAuth}
+          className="mt-4 smallcaps text-ink-2/70 underline decoration-rule decoration-1 underline-offset-[3px] active:text-ink"
+        >
+          {user ? (
+            <>
+              <span className="text-accent">●</span>
+              <span className="px-2 text-rule">·</span>
+              Backed up
+            </>
+          ) : (
+            <>
+              <span className="text-ink-2/50">○</span>
+              <span className="px-2 text-rule">·</span>
+              Not backed up · sign in
+            </>
+          )}
+        </button>
       )}
     </header>
   );

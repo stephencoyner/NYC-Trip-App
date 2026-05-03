@@ -6,6 +6,7 @@ import { DayView } from "./views/DayView";
 import { DayPips } from "./components/DayPips";
 import { useCaptures } from "./hooks/useCaptures";
 import { Recap } from "./components/Recap";
+import { AuthSheet } from "./components/AuthSheet";
 
 export default function App() {
   const now = useNow(30_000);
@@ -26,6 +27,7 @@ export default function App() {
   // Auto-fade to recap after the trip ends.
   const tripEnded = now > parseNY(`${TRIP.endDate}T23:59`);
   const [recapOpen, setRecapOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   useEffect(() => {
     if (tripEnded) setRecapOpen(true);
   }, [tripEnded]);
@@ -48,12 +50,14 @@ export default function App() {
         setActiveDayIndex={setActive}
         todayIndex={todayIndex}
         onOpenRecap={() => setRecapOpen(true)}
+        onOpenAuth={() => setAuthOpen(true)}
       />
       <DayPips
         active={active}
         todayIndex={todayIndex}
         onSelect={setActive}
       />
+      <AuthSheet open={authOpen} onClose={() => setAuthOpen(false)} />
     </main>
   );
 }

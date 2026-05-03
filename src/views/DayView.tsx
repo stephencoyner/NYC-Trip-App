@@ -16,9 +16,10 @@ type Props = {
   setActiveDayIndex: (i: number) => void;
   todayIndex: number;
   onOpenRecap: () => void;
+  onOpenAuth?: () => void;
 };
 
-export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, onOpenRecap }: Props) {
+export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, onOpenRecap, onOpenAuth }: Props) {
   const day = DAYS[activeDayIndex];
   const isToday = activeDayIndex === todayIndex;
   const { captures, add: _addCap } = useCaptures();
@@ -66,7 +67,7 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
       onTouchEnd={onTouchEnd}
       className="relative pb-32"
     >
-      <Masthead day={day} isToday={isToday} dayIndex={activeDayIndex} total={DAYS.length} />
+      <Masthead day={day} isToday={isToday} dayIndex={activeDayIndex} total={DAYS.length} onOpenAuth={onOpenAuth} />
 
       {isToday && greeting && (
         <p className="px-6 -mt-2 mb-2 font-serif italic text-ink-2 text-[15px]">{greeting}</p>

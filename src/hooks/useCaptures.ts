@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Capture, loadCaptures, saveCaptures } from "../lib/storage";
+import { backfill, pullCaptures } from "../lib/sync";
+import { useAuth } from "./useAuth";
 
 export function useCaptures() {
+  const { user } = useAuth();
   const [captures, setCaptures] = useState<Capture[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -11,6 +14,23 @@ export function useCaptures() {
       setReady(true);
     });
   }, []);
+
+  // When the user signs in (or returns from a magic-link redirect),
+  // backfill any local-only captures and pull anything new from the server.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      await backfill(user.id);
+      await pullCaptures(user.id);
+      if (cancelled) return;
+      const fresh = await loadCaptures();
+      setCaptures(fresh);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   const persist = useCallback(async (next: Capture[]) => {
     setCaptures(next);

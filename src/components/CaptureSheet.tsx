@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Stop } from "../data/itinerary";
 import { Capture, addCapture, putBlob, pushRecentMoods, loadRecentMoods, loadSettings, saveSettings, requestPersistentStorage } from "../lib/storage";
+import { pushCapture } from "../lib/sync";
+import { useAuth } from "../hooks/useAuth";
 import { BottomSheet } from "./BottomSheet";
 import { StarRating } from "./StarRating";
 import { MoodChips } from "./MoodChips";
@@ -16,6 +18,7 @@ type Props = {
 };
 
 export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
+  const { user } = useAuth();
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -120,6 +123,9 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     // Ask the browser to keep this data through disk pressure / inactivity.
     // First save is a deliberate user gesture, which is when persist() is most likely granted.
     void requestPersistentStorage();
+    // Mirror to Supabase if signed in. Fire-and-forget — local save is what
+    // the user feels; the cloud copy follows in the background.
+    if (user) void pushCapture(cap, user.id).catch(() => {});
     if ("vibrate" in navigator) navigator.vibrate?.(8);
     onSaved();
     onClose();

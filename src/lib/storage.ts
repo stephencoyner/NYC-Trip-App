@@ -11,6 +11,10 @@ export type Capture = {
   moods?: string[];
   companions?: string[];
   voiceBlobKey?: string;
+  // ── Sync metadata (Supabase) ──
+  synced?: boolean;       // true once row + media exist on the server
+  photoPath?: string;     // Storage path for photo (e.g. "{uid}/{id}-photo")
+  voicePath?: string;     // Storage path for voice memo
 };
 
 const CAPTURES_KEY = "captures-v1";
