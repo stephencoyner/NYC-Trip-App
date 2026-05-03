@@ -88,3 +88,28 @@ export async function pushRecentMoods(moods: string[]) {
 }
 
 export { keys, del };
+
+/** Ask the browser to keep our IndexedDB data even under disk pressure.
+ *  Safari grants this silently to installed PWAs; Chrome shows a prompt. */
+export async function requestPersistentStorage(): Promise<boolean> {
+  if (typeof navigator === "undefined" || !navigator.storage?.persist) return false;
+  try {
+    if (await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch {
+    return false;
+  }
+}
+
+/** Returns { usedMB, quotaMB } or undefined if the API is unavailable. */
+export async function storageEstimate(): Promise<{ usedMB: number; quotaMB: number } | undefined> {
+  if (typeof navigator === "undefined" || !navigator.storage?.estimate) return undefined;
+  try {
+    const est = await navigator.storage.estimate();
+    const usedMB = Math.round(((est.usage ?? 0) / 1024 / 1024) * 10) / 10;
+    const quotaMB = Math.round(((est.quota ?? 0) / 1024 / 1024) * 10) / 10;
+    return { usedMB, quotaMB };
+  } catch {
+    return undefined;
+  }
+}

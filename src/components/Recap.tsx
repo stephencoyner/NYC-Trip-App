@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DAYS, TRIP } from "../data/itinerary";
-import { Capture } from "../lib/storage";
+import { Capture, storageEstimate } from "../lib/storage";
 import { PhotoFrame } from "./PhotoFrame";
 import { StarFixed } from "./StarRating";
 
 type Props = { captures: Capture[]; onClose: () => void };
 
 export function Recap({ captures, onClose }: Props) {
+  const [storage, setStorage] = useState<{ usedMB: number; quotaMB: number } | undefined>();
+  useEffect(() => {
+    storageEstimate().then(setStorage);
+  }, [captures.length]);
+
   const ratings = captures.map((c) => c.rating || 0).filter(Boolean);
   const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 
@@ -164,6 +169,17 @@ export function Recap({ captures, onClose }: Props) {
             <dt className="smallcaps text-ink-2">Average</dt>
             <dd className="mt-1"><StarFixed value={Math.round(avg * 2) / 2} size={20} /></dd>
           </div>
+          {storage && (
+            <div>
+              <dt className="smallcaps text-ink-2">On this device</dt>
+              <dd className="mt-1 font-mono text-[12px] text-ink-2">
+                {storage.usedMB.toFixed(1)} MB used
+                {storage.quotaMB > 0 && (
+                  <> · {Math.round((storage.usedMB / storage.quotaMB) * 100)}% of {Math.round(storage.quotaMB)} MB</>
+                )}
+              </dd>
+            </div>
+          )}
         </dl>
       </section>
     </article>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Stop } from "../data/itinerary";
-import { Capture, addCapture, putBlob, pushRecentMoods, loadRecentMoods, loadSettings, saveSettings } from "../lib/storage";
+import { Capture, addCapture, putBlob, pushRecentMoods, loadRecentMoods, loadSettings, saveSettings, requestPersistentStorage } from "../lib/storage";
 import { BottomSheet } from "./BottomSheet";
 import { StarRating } from "./StarRating";
 import { MoodChips } from "./MoodChips";
@@ -119,6 +119,9 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     };
     await addCapture(cap);
     if (moods.length) await pushRecentMoods(moods);
+    // Ask the browser to keep this data through disk pressure / inactivity.
+    // First save is a deliberate user gesture, which is when persist() is most likely granted.
+    void requestPersistentStorage();
     if ("vibrate" in navigator) navigator.vibrate?.(8);
     onSaved();
     onClose();
