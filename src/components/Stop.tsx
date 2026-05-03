@@ -1,11 +1,13 @@
 import React from "react";
 import { Stop as StopT, Day } from "../data/itinerary";
-import { Capture } from "../lib/storage";
+import { Capture, getBlob } from "../lib/storage";
 import { fmtTimeMono24 } from "../lib/time";
 import { googleMapsPlaceUrl } from "../lib/maps";
+import { blobToFile, canShareFiles, captureFilename, shareFiles } from "../lib/photos";
 import { PhotoFrame } from "./PhotoFrame";
 import { MapSnippet } from "./MapSnippet";
 import { StarFixed } from "./StarRating";
+import { SaveIcon } from "./icons";
 
 type State = "past" | "current" | "future";
 
@@ -145,14 +147,36 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
 }
 
 function CaptureCard({ c }: { c: Capture }) {
+  async function savePhotoToPhotos() {
+    if (!c.photoBlobKey) return;
+    const blob = await getBlob(c.photoBlobKey);
+    if (!blob) return;
+    const file = blobToFile(blob, captureFilename(c.dayId, c.stopId, "photo"));
+    await shareFiles([file]);
+  }
+
+  const showSave = !!c.photoBlobKey && canShareFiles();
+
   return (
     <div className="space-y-1">
       <PhotoFrame blobKey={c.photoBlobKey} ratio="square" />
       <div className="flex items-center justify-between">
         {c.rating !== undefined ? <StarFixed value={c.rating} /> : <span />}
-        <span className="font-mono text-[10px] text-ink-2/80">
-          {new Date(c.ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-        </span>
+        <div className="flex items-center gap-2">
+          {showSave && (
+            <button
+              type="button"
+              onClick={savePhotoToPhotos}
+              aria-label="Save to Photos"
+              className="text-ink-2/80 hover:text-ink active:opacity-70 -my-1 -mx-1 p-1"
+            >
+              <SaveIcon size={12} />
+            </button>
+          )}
+          <span className="font-mono text-[10px] text-ink-2/80">
+            {new Date(c.ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        </div>
       </div>
       {c.note && (
         <p className="font-serif italic text-[13.5px] leading-snug text-ink-2">{c.note}</p>

@@ -8,6 +8,7 @@ import { StarRating } from "./StarRating";
 import { MoodChips } from "./MoodChips";
 import { MicIcon, PlusIcon } from "./icons";
 import { PhotoFrame } from "./PhotoFrame";
+import { blobToFile, canShareFiles, captureFilename, shareFiles } from "../lib/photos";
 
 type Props = {
   open: boolean;
@@ -152,6 +153,17 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     const id = `c_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const photoKey = photoBlob ? `photo_${id}` : undefined;
     const voiceKey = voiceBlob ? `voice_${id}` : undefined;
+
+    // ── SYNCHRONOUS: open the iOS share sheet immediately so the user
+    // gesture context is preserved. iOS revokes share() permission after
+    // even a single await, so this has to fire before any async work.
+    // The share sheet opens over the (closing) capture sheet; user taps
+    // "Save Image" to drop it into Photos, or dismisses.
+    if (photoBlob && canShareFiles()) {
+      const file = blobToFile(photoBlob, captureFilename(dayId, stop.id, "photo"));
+      void shareFiles([file]);
+    }
+
     if (photoBlob && photoKey) await putBlob(photoKey, photoBlob);
     if (voiceBlob && voiceKey) await putBlob(voiceKey, voiceBlob);
     const cap: Capture = {
