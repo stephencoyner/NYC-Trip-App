@@ -34,7 +34,7 @@ export function Timeline({ day, now, isToday, captures, onOpenSwap }: Props) {
   return (
     <div className="relative">
       {/* The dashed spine */}
-      <div className="pointer-events-none absolute left-5 top-0 bottom-0 w-px spine" aria-hidden />
+      <div className="pointer-events-none absolute left-[60px] top-0 bottom-0 w-px spine" aria-hidden />
 
       <ol className="divide-y divide-rule/40">
         {items.map(({ stop, start, end }, i) => {
@@ -84,7 +84,7 @@ function NowLine({ now, start, end }: { now: Date; start: Date; end?: Date }) {
       style={{ top: `calc(${(t * 100).toFixed(2)}% + 24px)` }}
       aria-hidden
     >
-      <span className="ml-5 -translate-x-1/2 h-2 w-2 rounded-full bg-accent" />
+      <span className="ml-[60px] -translate-x-1/2 h-2 w-2 rounded-full bg-accent" />
       <span className="flex-1 h-[1.5px] bg-accent" />
       <span className="smallcaps text-accent pr-4">NOW</span>
     </div>
@@ -94,8 +94,8 @@ function NowLine({ now, start, end }: { now: Date; start: Date; end?: Date }) {
 function BetweenLabel({ text }: { text: string }) {
   if (!text || text === "—") return null;
   return (
-    <div className="relative pl-10 pr-5 py-2">
-      <span aria-hidden className="absolute left-5 top-0 bottom-0 w-px spine" />
+    <div className="relative pl-[76px] pr-5 py-2">
+      <span aria-hidden className="absolute left-[60px] top-0 bottom-0 w-px spine" />
       <p className="font-mono text-[10.5px] text-ink-2/80">— {text} —</p>
     </div>
   );

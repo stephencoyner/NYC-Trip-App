@@ -25,7 +25,7 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
   return (
     <article
       className={[
-        "relative pl-10 pr-5 py-5",
+        "relative pl-[76px] pr-5 py-5",
         dim ? "opacity-55" : "",
       ].join(" ")}
     >
@@ -33,7 +33,7 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
       <span
         aria-hidden
         className={[
-          "absolute left-[20px] top-7 h-[10px] w-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-paper",
+          "absolute left-[60px] top-7 h-[10px] w-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-paper",
           ringed
             ? "ring-2 ring-accent"
             : state === "past"
@@ -44,12 +44,12 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
       {ringed && (
         <span
           aria-hidden
-          className="absolute left-[20px] top-7 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 ring-accent/40"
+          className="absolute left-[60px] top-7 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 ring-accent/40"
         />
       )}
 
-      {/* Time block — left edge */}
-      <div className="absolute left-0 top-5 -translate-x-2 w-9 text-right">
+      {/* Time block — left gutter, right-aligned, with breathing room before the spine */}
+      <div className="absolute left-3 top-5 w-[44px] text-right whitespace-nowrap">
         <div className="font-mono text-[11px] tracking-tight text-ink-2">
           {fmtTimeMono24(startDate)}
         </div>
