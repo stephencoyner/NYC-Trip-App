@@ -45,21 +45,25 @@ export function MapSnippet({ lat, lng, address, title, neighborhood, label }: Pr
         <SvgGrid lat={40.71} lng={-73.99} />
       )}
 
-      {/* "You are here" needle — single source of truth, regardless of map source. */}
+      {/* Map pin · cinnabar with cream center dot. Bottom tip lands on the
+          true coordinate (center of the static map). One source of truth,
+          regardless of whether Mapbox or the SVG fallback is rendering. */}
       <svg
-        viewBox="0 0 24 24"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[68%] text-accent"
-        width="22"
-        height="22"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        viewBox="0 0 32 40"
+        width="26"
+        height="32"
+        className="absolute left-1/2 top-1/2 text-accent pointer-events-none"
+        style={{ transform: "translate(-50%, -100%)" }}
         aria-hidden
       >
-        <path d="M12 2v18" />
-        <path d="M12 2l4 6h-8z" fill="currentColor" />
+        <path
+          d="M16 2 C8 2 2 8 2 16 C2 24 16 38 16 38 C16 38 30 24 30 16 C30 8 24 2 16 2 Z"
+          fill="currentColor"
+          stroke="#1F1B16"
+          strokeWidth="0.6"
+          strokeLinejoin="round"
+        />
+        <circle cx="16" cy="14" r="4.5" fill="#F4EDE0" />
       </svg>
 
       {label && (
