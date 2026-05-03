@@ -9,7 +9,6 @@ import { CaptureFAB } from "../components/CaptureFAB";
 import { CaptureSheet } from "../components/CaptureSheet";
 import { SwapSheet } from "../components/SwapSheet";
 import { useCaptures } from "../hooks/useCaptures";
-import { ArrowDownIcon } from "../components/icons";
 
 type Props = {
   now: Date;
@@ -29,9 +28,6 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
   const [captureStop, setCaptureStop] = useState<Stop | undefined>();
   const [swapStop, setSwapStop] = useState<Stop | undefined>();
   const [swaps, setSwaps] = useState<Record<string, string>>({});
-  const [showJump, setShowJump] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const nowMarkerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     loadSwaps().then(setSwaps);
@@ -46,24 +42,6 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
     const past = items.slice().reverse().find(({ start }) => start <= now);
     return past?.s ?? items[0]?.s;
   }, [day, isToday, now]);
-
-  // Show the "jump to now" button when scrolled away.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      if (!nowMarkerRef.current) {
-        setShowJump(false);
-        return;
-      }
-      const rect = nowMarkerRef.current.getBoundingClientRect();
-      const out = rect.top < 80 || rect.top > window.innerHeight - 120;
-      setShowJump(out && isToday);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [isToday, activeDayIndex]);
 
   // Day-swipe gestures.
   const touchX = useRef<number | null>(null);
@@ -84,7 +62,6 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
 
   return (
     <div
-      ref={containerRef}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       className="relative pb-32"
@@ -102,9 +79,6 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
 
       {isToday && <NowBar day={day} now={now} />}
 
-      {/* Sentinel for "jump to now" */}
-      <div ref={nowMarkerRef} className="h-px" aria-hidden />
-
       <Timeline
         day={day}
         now={now}
@@ -120,17 +94,6 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
             See the trip as a book
           </button>
         </div>
-      )}
-
-      {showJump && (
-        <button
-          onClick={() => nowMarkerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-          className="fixed bottom-[140px] left-4 z-30 inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-2 ring-1 ring-ink/40"
-          aria-label="Jump to now"
-        >
-          <ArrowDownIcon size={12} />
-          <span className="font-mono text-[11px]">jump to now</span>
-        </button>
       )}
 
       <CaptureFAB
