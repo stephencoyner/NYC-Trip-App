@@ -29,6 +29,7 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
   const [allCompanions, setAllCompanions] = useState<string[]>([]);
   const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [recording, setRecording] = useState(false);
+  const [recError, setRecError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const recChunks = useRef<BlobPart[]>([]);
@@ -60,27 +61,74 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
   }
 
   async function startRecording() {
+    setRecError(null);
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setRecError("Microphone API not available in this browser.");
+        return;
+      }
+      if (typeof MediaRecorder === "undefined") {
+        setRecError("Voice memos aren't supported in this browser.");
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Pick the first MIME type the browser actually supports. iOS Safari
+      // uses audio/mp4; Chrome and Firefox use audio/webm. Hardcoding webm
+      // breaks recording on iOS, which was the original bug.
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4;codecs=mp4a.40.2",
+        "audio/mp4",
+        "audio/aac",
+        "audio/mpeg",
+      ];
+      const supported = candidates.find(
+        (c) => typeof MediaRecorder.isTypeSupported === "function" && MediaRecorder.isTypeSupported(c)
+      );
+
       recChunks.current = [];
-      const mr = new MediaRecorder(stream);
-      mr.ondataavailable = (e) => recChunks.current.push(e.data);
+      const mr = supported ? new MediaRecorder(stream, { mimeType: supported }) : new MediaRecorder(stream);
+
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recChunks.current.push(e.data);
+      };
       mr.onstop = () => {
-        const b = new Blob(recChunks.current, { type: "audio/webm" });
+        const type = mr.mimeType || supported || "audio/webm";
+        const b = new Blob(recChunks.current, { type });
         setVoiceBlob(b);
         stream.getTracks().forEach((t) => t.stop());
       };
+      mr.onerror = (e) => {
+        console.error("[recording] MediaRecorder error:", e);
+        setRecError("Recording error — try again.");
+      };
+
       recRef.current = mr;
       mr.start();
       setRecording(true);
+
       setTimeout(() => {
         if (recRef.current?.state === "recording") {
           recRef.current.stop();
           setRecording(false);
         }
       }, 30_000);
-    } catch {
-      // permission denied — silent
+    } catch (err) {
+      console.error("[recording] failed:", err);
+      const name = (err as Error)?.name;
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        setRecError(
+          "Microphone permission denied. iOS: Settings → Safari → Microphone → Allow."
+        );
+      } else if (name === "NotFoundError") {
+        setRecError("No microphone found on this device.");
+      } else {
+        setRecError((err as Error)?.message || "Couldn't start recording.");
+      }
+      setRecording(false);
     }
   }
   function stopRecording() {
@@ -198,15 +246,21 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
           <div className="h-px bg-rule/70" />
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={recording ? stopRecording : startRecording}
-              className={["inline-flex items-center gap-1.5 text-[12px]", recording ? "text-accent" : "text-ink-2"].join(" ")}
+              className={["inline-flex items-center gap-1.5 text-[12px] py-2 -my-2 active:opacity-70", recording ? "text-accent" : "text-ink-2 hover:text-ink"].join(" ")}
             >
               <MicIcon size={14} />
               <span className="font-mono tracking-tight">
-                {recording ? "recording…" : voiceBlob ? "voice memo saved" : "voice memo"}
+                {recording ? "recording · tap to stop" : voiceBlob ? "voice memo saved · tap to redo" : "voice memo · tap to start"}
               </span>
             </button>
           </div>
+          {recError && (
+            <p className="font-mono text-[11px] text-accent leading-snug max-w-[36ch]">
+              {recError}
+            </p>
+          )}
         </div>
       </div>
 
