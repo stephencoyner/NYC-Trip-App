@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { CloseIcon } from "./icons";
 
 type Props = {
   open: boolean;
@@ -6,9 +7,18 @@ type Props = {
   title?: React.ReactNode;
   children: React.ReactNode;
   height?: string; // e.g., "min(70vh, 640px)"
+  /** Slot rendered as a sticky action bar at the bottom of the sheet (e.g., a big Save). */
+  footer?: React.ReactNode;
 };
 
-export function BottomSheet({ open, onClose, title, children, height = "min(72vh, 720px)" }: Props) {
+export function BottomSheet({
+  open,
+  onClose,
+  title,
+  children,
+  height = "min(82vh, 760px)",
+  footer,
+}: Props) {
   const [drag, setDrag] = useState(0);
   const startY = useRef<number | null>(null);
 
@@ -54,33 +64,52 @@ export function BottomSheet({ open, onClose, title, children, height = "min(72vh
       <div
         role="dialog"
         aria-modal="true"
-        className="absolute inset-x-0 bottom-0 bg-paper ring-1 ring-rule/70 transition-transform duration-220 ease-ios"
+        className="absolute inset-x-0 bottom-0 flex flex-col bg-paper ring-1 ring-rule/70 transition-transform duration-220 ease-ios"
         style={{
           height,
-          transform: open
-            ? `translateY(${drag}px)`
-            : "translateY(100%)",
+          transform: open ? `translateY(${drag}px)` : "translateY(100%)",
           borderTopLeftRadius: 14,
           borderTopRightRadius: 14,
         }}
       >
+        {/* Drag handle (still works for fine pointers) */}
         <div
           onPointerDown={handleStart}
           onPointerMove={handleMove}
           onPointerUp={handleEnd}
           onPointerCancel={handleEnd}
-          className="flex flex-col items-center pt-3 pb-1 cursor-grab touch-none select-none"
+          className="flex flex-col items-center pt-3 pb-1 cursor-grab touch-none select-none shrink-0"
         >
           <div className="h-1 w-9 rounded-full bg-rule" />
         </div>
-        {title && (
-          <div className="px-6 pb-2 pt-1 font-serif italic text-[20px] text-ink">
-            {title}
+
+        {/* Header: title + explicit close button */}
+        <div className="relative flex items-start justify-between gap-3 px-6 pt-1 pb-2 shrink-0">
+          {title ? (
+            <div className="font-serif italic text-[20px] leading-snug text-ink min-w-0 pr-10">
+              {title}
+            </div>
+          ) : (
+            <span />
+          )}
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-3 top-0 flex h-10 w-10 items-center justify-center rounded-full text-ink-2 hover:text-ink active:scale-[0.95] transition-transform duration-150 ease-ios"
+          >
+            <CloseIcon size={18} strokeWidth={1.5} />
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">{children}</div>
+
+        {/* Sticky action bar */}
+        {footer && (
+          <div className="shrink-0 border-t border-rule/50 bg-paper px-6 py-3 pb-[max(env(safe-area-inset-bottom),12px)]">
+            {footer}
           </div>
         )}
-        <div className="overflow-y-auto px-6 pb-8" style={{ maxHeight: `calc(${height} - 80px)` }}>
-          {children}
-        </div>
       </div>
     </div>
   );

@@ -125,6 +125,8 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     onClose();
   }
 
+  const canSave = !!photoBlob || note.trim().length > 0 || rating > 0 || moods.length > 0 || !!voiceBlob;
+
   return (
     <BottomSheet
       open={open}
@@ -134,7 +136,21 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
           A small thing about <em className="not-italic font-serif text-ink">{stop?.title ?? "this stop"}</em>
         </span>
       }
-      height="min(86vh, 760px)"
+      height="min(88vh, 800px)"
+      footer={
+        <button
+          onClick={save}
+          disabled={!canSave}
+          className={[
+            "block w-full py-3.5 text-center font-serif text-[18px] tracking-tight transition-colors duration-150 ease-ios",
+            canSave
+              ? "bg-ink text-paper active:bg-ink/90"
+              : "bg-paper-2 text-ink-2/60 cursor-not-allowed",
+          ].join(" ")}
+        >
+          Save this entry
+        </button>
+      }
     >
       <input
         ref={fileRef}
@@ -228,14 +244,6 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
         <div className="font-serif text-[16px]">{stop?.title}</div>
       </section>
 
-      <div className="mt-8 flex items-center justify-between">
-        <button onClick={onClose} className="font-mono text-[12px] text-ink-2">
-          cancel
-        </button>
-        <button onClick={save} className="btn-text">
-          Save
-        </button>
-      </div>
     </BottomSheet>
   );
 }

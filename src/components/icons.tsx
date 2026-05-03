@@ -72,6 +72,12 @@ export const PlusIcon = ({ size = 14, className, strokeWidth }: Props) => (
   </svg>
 );
 
+export const CloseIcon = ({ size = 16, className, strokeWidth }: Props) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} {...base(strokeWidth)}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
+);
+
 export const ChevronLeft = ({ size = 16, className, strokeWidth }: Props) => (
   <svg viewBox="0 0 24 24" width={size} height={size} className={className} {...base(strokeWidth)}>
     <path d="M15 5l-7 7 7 7" />
