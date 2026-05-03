@@ -56,13 +56,46 @@ export type Day = {
 
 export const TRIP = {
   city: "New York",
-  startDate: "2026-05-04",
+  startDate: "2026-05-03",
   endDate: "2026-05-08",
   timezone: "America/New_York",
   title: "New York, in May",
 };
 
 export const DAYS: Day[] = [
+  // ─────────────────────────────────────────────
+  // SUNDAY · land + Kevin's
+  // ─────────────────────────────────────────────
+  {
+    id: "d0",
+    date: "2026-05-03",
+    weekday: "Sunday",
+    ordinal: "the third of May",
+    weather: { tempF: 65, description: "Mild, clear", glyph: "sun" },
+    subtitle: "Land soft. Drop bags. See Kevin.",
+    stops: [
+      {
+        id: "d0s1",
+        start: "2026-05-03T17:00",
+        title: "Wheels down · LGA",
+        neighborhood: "Queens",
+        kind: "transit",
+        note: "Cab to Brooklyn — ~35 min, ~$50. Faster than the Q70 + 7 + F shuffle at this hour.",
+        fromPrev: "—",
+      },
+      {
+        id: "d0s2",
+        start: "2026-05-03T18:30",
+        title: "Kevin's place",
+        neighborhood: "Brooklyn",
+        kind: "lodging",
+        note: "Drop bags. Hug. Eat whatever's around. Don't unpack.",
+        metaNote: "early night — workday tomorrow.",
+        fromPrev: "35 min · cab",
+      },
+    ],
+  },
+
   // ─────────────────────────────────────────────
   // MONDAY · work + Park Slope dinner
   // ─────────────────────────────────────────────
