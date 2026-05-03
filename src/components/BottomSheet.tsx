@@ -72,37 +72,42 @@ export function BottomSheet({
           borderTopRightRadius: 14,
         }}
       >
-        {/* Drag handle (still works for fine pointers) */}
-        <div
-          onPointerDown={handleStart}
-          onPointerMove={handleMove}
-          onPointerUp={handleEnd}
-          onPointerCancel={handleEnd}
-          className="flex flex-col items-center pt-3 pb-1 cursor-grab touch-none select-none shrink-0"
-        >
-          <div className="h-1 w-9 rounded-full bg-rule" />
-        </div>
-
-        {/* Header: title + explicit close button */}
-        <div className="relative flex items-start justify-between gap-3 px-6 pt-1 pb-2 shrink-0">
-          {title ? (
-            <div className="font-serif italic text-[20px] leading-snug text-ink min-w-0 pr-10">
-              {title}
-            </div>
-          ) : (
-            <span />
-          )}
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute right-3 top-0 flex h-10 w-10 items-center justify-center rounded-full text-ink-2 hover:text-ink active:scale-[0.95] transition-transform duration-150 ease-ios"
+        {/* Pinned top region: drag handle + title + close button.
+            shrink-0 keeps it from collapsing when content overflows. */}
+        <div className="shrink-0 bg-paper border-b border-rule/40">
+          <div
+            onPointerDown={handleStart}
+            onPointerMove={handleMove}
+            onPointerUp={handleEnd}
+            onPointerCancel={handleEnd}
+            className="flex flex-col items-center pt-3 pb-1 cursor-grab touch-none select-none"
           >
-            <CloseIcon size={18} strokeWidth={1.5} />
-          </button>
+            <div className="h-1 w-9 rounded-full bg-rule" />
+          </div>
+
+          <div className="relative flex items-start justify-between gap-3 px-6 pt-1 pb-3">
+            {title ? (
+              <div className="font-serif italic text-[20px] leading-snug text-ink min-w-0 pr-12">
+                {title}
+              </div>
+            ) : (
+              <span />
+            )}
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-3 top-0 flex h-10 w-10 items-center justify-center rounded-full text-ink-2 hover:text-ink active:scale-[0.95] transition-transform duration-150 ease-ios"
+            >
+              <CloseIcon size={18} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-6 pb-6">{children}</div>
+        {/* Scrollable content. min-h-0 is required for flex-1 + overflow-y-auto
+            to actually scroll instead of pushing siblings off-screen. */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4">
+          {children}
+        </div>
 
         {/* Sticky action bar */}
         {footer && (
