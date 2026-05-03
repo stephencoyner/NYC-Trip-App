@@ -1,10 +1,15 @@
 import React from "react";
 import { Day, TRIP } from "../data/itinerary";
 import { WeatherGlyph } from "./icons";
+import { deviceIsInNY, deviceTZAbbr, offsetFromNYHours } from "../lib/time";
 
 type Props = { day: Day; isToday: boolean; dayIndex: number; total: number };
 
 export function Masthead({ day, isToday, dayIndex, total }: Props) {
+  const inNY = deviceIsInNY();
+  const abbr = deviceTZAbbr();
+  const off = offsetFromNYHours();
+  const offLabel = off === 0 ? "" : off > 0 ? `NY −${off}` : `NY +${Math.abs(off)}`;
   return (
     <header className="relative px-6 pt-12 pb-6">
       {isToday && (
@@ -36,6 +41,18 @@ export function Masthead({ day, isToday, dayIndex, total }: Props) {
       {day.subtitle && (
         <p className="mt-3 font-serif text-ink-2 text-[17px] leading-snug max-w-[28ch]">
           {day.subtitle}
+        </p>
+      )}
+
+      {!inNY && abbr && (
+        <p className="mt-4 smallcaps text-ink-2/80">
+          Times in {abbr}
+          {offLabel && (
+            <>
+              <span className="px-2 text-rule">·</span>
+              {offLabel}
+            </>
+          )}
         </p>
       )}
     </header>

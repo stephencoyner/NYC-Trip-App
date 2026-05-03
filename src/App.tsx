@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { DAYS, TRIP } from "./data/itinerary";
-import { dayKey, nowNY, parseNY } from "./lib/time";
+import { dayKey, parseNY } from "./lib/time";
 import { useNow } from "./hooks/useNow";
 import { DayView } from "./views/DayView";
 import { DayPips } from "./components/DayPips";
