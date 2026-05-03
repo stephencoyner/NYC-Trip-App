@@ -2,6 +2,7 @@ import React from "react";
 import { Stop as StopT, Day } from "../data/itinerary";
 import { Capture } from "../lib/storage";
 import { fmtTimeMono24 } from "../lib/time";
+import { googleMapsPlaceUrl } from "../lib/maps";
 import { PhotoFrame } from "./PhotoFrame";
 import { MapSnippet } from "./MapSnippet";
 import { StarFixed } from "./StarRating";
@@ -70,9 +71,19 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
             {stop.address && (
               <>
                 <span className="px-1.5 text-rule">·</span>
-                <span className="normal-case tracking-normal font-mono text-[10.5px]">
+                <a
+                  href={googleMapsPlaceUrl({
+                    geo: stop.geo,
+                    address: stop.address,
+                    title: stop.title,
+                    neighborhood: stop.neighborhood,
+                  })}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="normal-case tracking-normal font-mono text-[10.5px] underline decoration-rule decoration-1 underline-offset-[3px] hover:text-ink active:text-ink"
+                >
                   {stop.address}
-                </span>
+                </a>
               </>
             )}
           </div>
@@ -97,7 +108,14 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
 
       {stop.geo && (
         <div className="mt-4 max-w-[420px]">
-          <MapSnippet lat={stop.geo.lat} lng={stop.geo.lng} label={stop.neighborhood} />
+          <MapSnippet
+            lat={stop.geo.lat}
+            lng={stop.geo.lng}
+            address={stop.address}
+            title={stop.title}
+            neighborhood={stop.neighborhood}
+            label={stop.neighborhood}
+          />
         </div>
       )}
 

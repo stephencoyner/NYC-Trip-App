@@ -77,21 +77,25 @@ export const DAYS: Day[] = [
       {
         id: "d0s1",
         start: "2026-05-03T17:00",
-        title: "Wheels down · LGA",
+        title: "Wheels down · JFK",
         neighborhood: "Queens",
+        address: "JFK Airport, Queens, NY",
         kind: "transit",
-        note: "Cab to Brooklyn — ~35 min, ~$50. Faster than the Q70 + 7 + F shuffle at this hour.",
+        note: "Cab to Park Slope — ~45 min, ~$70 with tolls. The AirTrain + A + F is doable but a long haul with bags.",
         fromPrev: "—",
+        geo: { lat: 40.6413, lng: -73.7781 },
       },
       {
         id: "d0s2",
         start: "2026-05-03T18:30",
         title: "Kevin's place",
-        neighborhood: "Brooklyn",
+        neighborhood: "Park Slope",
+        address: "353 6th Ave, Brooklyn, NY 11215",
         kind: "lodging",
         note: "Drop bags. Hug. Eat whatever's around. Don't unpack.",
         metaNote: "early night — workday tomorrow.",
-        fromPrev: "35 min · cab",
+        fromPrev: "45 min · cab",
+        geo: { lat: 40.6707, lng: -73.9810 },
       },
     ],
   },
@@ -127,6 +131,7 @@ export const DAYS: Day[] = [
         kind: "work",
         note: "The 42 St–Bryant Park station empties at the building's front door.",
         fromPrev: "30 min · F train",
+        geo: { lat: 40.7544, lng: -73.9836 },
       },
       {
         id: "d1s3",
@@ -150,6 +155,7 @@ export const DAYS: Day[] = [
         metaNote: "the pho dac biet (confirm broth), the lemongrass pork chop, green papaya.",
         fromPrev: "12 min walk · 5th Ave south",
         reservation: { number: "0501", party: 1 },
+        geo: { lat: 40.6809, lng: -73.9779 },
         alternates: [
           {
             id: "a1",
@@ -201,6 +207,7 @@ export const DAYS: Day[] = [
         address: "1095 6th Ave",
         kind: "work",
         fromPrev: "30 min · F train",
+        geo: { lat: 40.7544, lng: -73.9836 },
       },
       {
         id: "d2s3",
@@ -208,10 +215,12 @@ export const DAYS: Day[] = [
         end: "2026-05-05T18:30",
         title: "Run · Prospect Park inner loop",
         neighborhood: "Prospect Park",
+        address: "Grand Army Plaza, Brooklyn, NY",
         kind: "run",
         note: "Enter at Grand Army Plaza. Counterclockwise. 3.35 mi, mostly flat-rolling, car-free.",
         metaNote: "sunset is 7:57 PM — plenty of light.",
         fromPrev: "10 min walk",
+        geo: { lat: 40.6724, lng: -73.9710 },
       },
       {
         id: "d2s4",
@@ -224,6 +233,7 @@ export const DAYS: Day[] = [
         note: "Kyoto-style obanzai. Multiple naturally GF small plates, sashimi, grilled fish. Quiet room.",
         fromPrev: "15 min · F to Bergen",
         reservation: { number: "0512", party: 1 },
+        geo: { lat: 40.6862, lng: -73.9966 },
         alternates: [
           {
             id: "a3",
@@ -276,6 +286,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "Start with the most curated. Margaret Howell, Auralee, Niuhans, Kaptain Sunshine.",
         fromPrev: "5 min walk",
+        geo: { lat: 40.7268, lng: -73.9923 },
       },
       {
         id: "d3s3",
@@ -288,6 +299,7 @@ export const DAYS: Day[] = [
         note: "Best denim selection in the city. Iron Heart, Full Count, Studio D'Artisan, Warehouse.",
         metaNote: "if you're buying one denim piece this week, do it here. Not at Self Edge later.",
         fromPrev: "8 min walk",
+        geo: { lat: 40.7196, lng: -74.0008 },
       },
       {
         id: "d3s4",
@@ -299,6 +311,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "Tailoring + soft accessories.",
         fromPrev: "8 min walk",
+        geo: { lat: 40.7196, lng: -74.0010 },
       },
       {
         id: "d3s5",
@@ -310,6 +323,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "List priority. Try on the chore coats and the corduroys.",
         fromPrev: "1 min walk · next door",
+        geo: { lat: 40.7196, lng: -74.0014 },
       },
       {
         id: "d3s6",
@@ -322,6 +336,7 @@ export const DAYS: Day[] = [
         note: "Thai, allergens marked. Naturally GF: red and massaman curries, grilled whole fish, crab fried rice (sub the soy).",
         fromPrev: "9 min walk",
         reservation: { number: "0612", party: 1 },
+        geo: { lat: 40.7268, lng: -73.9928 },
         alternates: [
           {
             id: "a5",
@@ -352,6 +367,7 @@ export const DAYS: Day[] = [
         note: "The Japanese workwear/heritage zone. Real McCoy's, Niuhans, Yuketen.",
         metaNote: "your longest stop. Budget 45+ min and don't rush.",
         fromPrev: "5 min walk",
+        geo: { lat: 40.7235, lng: -73.9962 },
       },
       {
         id: "d3s8",
@@ -363,6 +379,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "Walk-through.",
         fromPrev: "1 min walk",
+        geo: { lat: 40.7227, lng: -73.9966 },
       },
       {
         id: "d3s9",
@@ -373,6 +390,7 @@ export const DAYS: Day[] = [
         address: "195 Mulberry St",
         kind: "shop",
         fromPrev: "2 min walk",
+        geo: { lat: 40.7218, lng: -73.9968 },
       },
       {
         id: "d3s10",
@@ -384,6 +402,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "Quick browse unless something specific catches.",
         fromPrev: "3 min walk",
+        geo: { lat: 40.7240, lng: -73.9938 },
       },
       {
         id: "d3s11",
@@ -418,6 +437,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "Small, sharp edit.",
         fromPrev: "12 min walk south",
+        geo: { lat: 40.7180, lng: -73.9907 },
       },
       {
         id: "d3s13",
@@ -430,6 +450,7 @@ export const DAYS: Day[] = [
         note: "Heavyweight raw denim. Iron Heart, Flat Head, Strike Gold.",
         metaNote: "don't double-buy if you bought at Blue in Green. Pick the better staff fit, not both.",
         fromPrev: "5 min walk",
+        geo: { lat: 40.7204, lng: -73.9890 },
       },
       {
         id: "d3s14",
@@ -443,6 +464,7 @@ export const DAYS: Day[] = [
         metaNote: "sit at the bar, walk-in friendly early.",
         fromPrev: "10 min walk",
         reservation: { number: "0701", party: 1 },
+        geo: { lat: 40.7148, lng: -73.9911 },
         alternates: [
           {
             id: "a8",
@@ -511,6 +533,7 @@ export const DAYS: Day[] = [
         note: "List priority. South2 West8, Engineered Garments flagship, Needles. Geographically en route MoMA → Koreatown → Noguchi.",
         metaNote: "20 min walk south from MoMA. Don't dawdle.",
         fromPrev: "20 min walk south",
+        geo: { lat: 40.7553, lng: -73.9923 },
       },
       {
         id: "d4s4",
@@ -524,6 +547,7 @@ export const DAYS: Day[] = [
         metaNote: "the right reset between Duchamp and Noguchi.",
         fromPrev: "8 min walk south-east",
         reservation: { number: "0815", party: 1 },
+        geo: { lat: 40.7475, lng: -73.9844 },
         alternates: [
           {
             id: "a9",
@@ -570,6 +594,7 @@ export const DAYS: Day[] = [
         note: "Vietnamese, GF pho. Literally next door to the Cellar — no transit between dinner and the show.",
         metaNote: "or Joseph Leonard at 170 Waverly Pl if you want something more of an evening — book it.",
         fromPrev: "—",
+        geo: { lat: 40.7298, lng: -74.0009 },
         alternates: [
           {
             id: "a10",
@@ -593,6 +618,7 @@ export const DAYS: Day[] = [
         metaNote: "the lineup posts day-of. Don't expect the marquee names; expect the city's best working comics.",
         fromPrev: "1 min walk · next door",
         reservation: { number: "0930", party: 1 },
+        geo: { lat: 40.7297, lng: -74.0007 },
       },
       {
         id: "d4s9",
@@ -627,6 +653,7 @@ export const DAYS: Day[] = [
         kind: "coffee",
         note: "Walk down 5th. Black coffee, eat at home before. No rush.",
         fromPrev: "5 min walk",
+        geo: { lat: 40.6786, lng: -73.9811 },
       },
       {
         id: "d5s2",
@@ -648,6 +675,7 @@ export const DAYS: Day[] = [
         kind: "bookshop",
         note: "Indie. The fiction front table is the right place to start.",
         fromPrev: "—",
+        geo: { lat: 40.6868, lng: -73.9938 },
       },
       {
         id: "d5s4",
@@ -659,6 +687,7 @@ export const DAYS: Day[] = [
         kind: "shop",
         note: "Lebanese-American institution. Buy something to take home — preserved lemons, urfa biber, an oil.",
         fromPrev: "8 min walk west",
+        geo: { lat: 40.6904, lng: -73.9956 },
       },
       {
         id: "d5s5",
@@ -666,10 +695,12 @@ export const DAYS: Day[] = [
         end: "2026-05-08T12:30",
         title: "Brooklyn Heights Promenade",
         neighborhood: "Brooklyn Heights",
+        address: "Brooklyn Heights Promenade, Brooklyn, NY",
         kind: "walk",
         note: "Best Manhattan view in the city. Walk it slowly, end-to-end.",
         metaNote: "do not put on headphones.",
         fromPrev: "10 min walk",
+        geo: { lat: 40.6975, lng: -73.9954 },
       },
       {
         id: "d5s6",
@@ -682,6 +713,7 @@ export const DAYS: Day[] = [
         note: "Italian. Has a GF pasta. The escarole, the meatballs, a glass of red.",
         fromPrev: "15 min walk south",
         reservation: { number: "1230", party: 1 },
+        geo: { lat: 40.6802, lng: -73.9959 },
         alternates: [
           {
             id: "a11",
@@ -732,10 +764,12 @@ export const DAYS: Day[] = [
         end: "2026-05-08T16:50",
         title: "NYC Ferry · DUMBO → N. Williamsburg",
         neighborhood: "Fulton Ferry → India St",
+        address: "Fulton Ferry Landing, Brooklyn, NY",
         kind: "transit",
         note: "East River route, top deck. ~15 min, $4.50.",
         metaNote: "the only Manhattan you'll touch all day is the skyline.",
         fromPrev: "10 min walk back to Fulton Ferry",
+        geo: { lat: 40.7035, lng: -73.9907 },
       },
       {
         id: "d5s11",
@@ -743,10 +777,12 @@ export const DAYS: Day[] = [
         end: "2026-05-08T18:30",
         title: "Domino Park · sunset",
         neighborhood: "Williamsburg",
+        address: "Domino Park, Brooklyn, NY",
         kind: "walk",
         note: "Walk south through Williamsburg to Domino. Sunset under the Williamsburg Bridge.",
         metaNote: "this is the moment of the day.",
         fromPrev: "15 min walk south",
+        geo: { lat: 40.7144, lng: -73.9683 },
       },
       {
         id: "d5s12",
@@ -754,11 +790,12 @@ export const DAYS: Day[] = [
         end: "2026-05-08T21:30",
         title: "The Four Horsemen",
         neighborhood: "Williamsburg",
-        address: "295 Grand St",
+        address: "295 Grand St, Brooklyn",
         kind: "bar",
         note: "Michelin-starred natural wine, 250+ bottles. Mid-30s creative crowd — your demographic.",
         metaNote: "walk-in: put your name down at 5:30 on the way over, OR arrive 9:30 when the first seating clears.",
         fromPrev: "10 min walk",
+        geo: { lat: 40.7124, lng: -73.9576 },
         alternates: [
           {
             id: "a12",

@@ -2,6 +2,7 @@ import React from "react";
 import { Day, Stop as StopT } from "../data/itinerary";
 import { Capture } from "../lib/storage";
 import { parseNY } from "../lib/time";
+import { googleMapsDirectionsUrl, inferMode } from "../lib/maps";
 import { Stop } from "./Stop";
 
 type Props = {
@@ -58,8 +59,8 @@ export function Timeline({ day, now, isToday, captures, onOpenSwap }: Props) {
                 <NowLine now={now} start={start} end={end} />
               )}
 
-              {next && stop.fromPrev && (
-                <BetweenLabel text={next.stop.fromPrev || stop.fromPrev || ""} />
+              {next && next.stop.fromPrev && (
+                <BetweenLabel from={stop} to={next.stop} text={next.stop.fromPrev || ""} />
               )}
             </li>
           );
@@ -91,12 +92,24 @@ function NowLine({ now, start, end }: { now: Date; start: Date; end?: Date }) {
   );
 }
 
-function BetweenLabel({ text }: { text: string }) {
+function BetweenLabel({ from, to, text }: { from: StopT; to: StopT; text: string }) {
   if (!text || text === "—") return null;
+  const url = googleMapsDirectionsUrl({
+    origin: { geo: from.geo, address: from.address, title: from.title, neighborhood: from.neighborhood },
+    destination: { geo: to.geo, address: to.address, title: to.title, neighborhood: to.neighborhood },
+    mode: inferMode(text),
+  });
   return (
     <div className="relative pl-[76px] pr-5 py-2">
       <span aria-hidden className="absolute left-[60px] top-0 bottom-0 w-px spine" />
-      <p className="font-mono text-[10.5px] text-ink-2/80">— {text} —</p>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-baseline gap-1 font-mono text-[10.5px] text-ink-2/80 underline decoration-rule decoration-1 underline-offset-[3px] hover:text-ink active:text-ink"
+      >
+        — {text} →
+      </a>
     </div>
   );
 }
