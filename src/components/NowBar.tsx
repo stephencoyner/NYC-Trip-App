@@ -36,7 +36,7 @@ export function NowBar({ day, now }: Props) {
   if (current) {
     const until = current.end ?? current.start;
     return (
-      <div className="sticky top-0 z-20 mx-4 mt-2 rounded-sm bg-paper-2/95 p-3 ring-1 ring-rule/60">
+      <div className="sticky top-2 z-20 mx-4 mt-2 rounded-sm bg-paper-2/95 p-3 ring-1 ring-rule/60">
         <div className="smallcaps text-accent">RIGHT NOW</div>
         <div className="mt-1 font-serif text-[19px] leading-snug">
           {current.s.title}
@@ -56,7 +56,7 @@ export function NowBar({ day, now }: Props) {
   if (next) {
     const minsToNext = Math.max(0, Math.round((next.start.getTime() - now.getTime()) / 60000));
     return (
-      <div className="sticky top-0 z-20 mx-4 mt-2 rounded-sm bg-paper-2/95 p-3 ring-1 ring-rule/60">
+      <div className="sticky top-2 z-20 mx-4 mt-2 rounded-sm bg-paper-2/95 p-3 ring-1 ring-rule/60">
         <div className="smallcaps text-ink-2">UP NEXT · {minsToNext} MIN AWAY</div>
         <div className="mt-1 font-serif text-[19px] leading-snug">{next.s.title}</div>
         <div className="mt-1 font-mono text-[11px] text-ink-2">

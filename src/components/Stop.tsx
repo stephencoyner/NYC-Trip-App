@@ -19,9 +19,10 @@ type Props = {
   endDate?: Date;
   captures: Capture[];
   onOpenSwap?: (s: StopT) => void;
+  onEditCapture?: (c: Capture) => void;
 };
 
-export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: Props) {
+export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap, onEditCapture }: Props) {
   const dim = state === "past";
   const ringed = state === "current";
 
@@ -123,7 +124,7 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
       {captures.length > 0 && (
         <div className="mt-4 grid grid-cols-2 gap-2 max-w-[420px]">
           {captures.slice(0, 4).map((c) => (
-            <CaptureCard key={c.id} c={c} />
+            <CaptureCard key={c.id} c={c} onEdit={onEditCapture} />
           ))}
         </div>
       )}
@@ -145,8 +146,9 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
   );
 }
 
-function CaptureCard({ c }: { c: Capture }) {
-  async function savePhotoToPhotos() {
+function CaptureCard({ c, onEdit }: { c: Capture; onEdit?: (c: Capture) => void }) {
+  async function savePhotoToPhotos(e: React.MouseEvent) {
+    e.stopPropagation();
     if (!c.photoBlobKey) return;
     const blob = await getBlob(c.photoBlobKey);
     if (!blob) return;
@@ -157,7 +159,22 @@ function CaptureCard({ c }: { c: Capture }) {
   const showSave = !!c.photoBlobKey && canShareFiles();
 
   return (
-    <div className="space-y-1">
+    <div
+      role={onEdit ? "button" : undefined}
+      tabIndex={onEdit ? 0 : undefined}
+      onClick={onEdit ? () => onEdit(c) : undefined}
+      onKeyDown={
+        onEdit
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onEdit(c);
+              }
+            }
+          : undefined
+      }
+      className={["space-y-1", onEdit ? "cursor-pointer active:opacity-80" : ""].join(" ")}
+    >
       {c.photoBlobKey && <PhotoFrame blobKey={c.photoBlobKey} ratio="square" />}
       <div className="flex items-center justify-between">
         {c.rating !== undefined ? <StarFixed value={c.rating} /> : <span />}
@@ -208,7 +225,8 @@ function VoicePlayer({ blobKey }: { blobKey: string }) {
     };
   }, [blobKey]);
 
-  function toggle() {
+  function toggle(e: React.MouseEvent) {
+    e.stopPropagation();
     const el = audioRef.current;
     if (!el) return;
     if (playing) el.pause();
