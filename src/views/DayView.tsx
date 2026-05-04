@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Day, DAYS, Stop } from "../data/itinerary";
 import { Capture, clearSwap, loadSwaps, saveSwap } from "../lib/storage";
 import { dayKey, parseNY } from "../lib/time";
-import { loadUserStops, type UserStop } from "../lib/userStops";
+import { useUserStops } from "../hooks/useUserStops";
 import { Masthead } from "../components/Masthead";
 import { Timeline } from "../components/Timeline";
 import { NowBar } from "../components/NowBar";
@@ -33,11 +33,10 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
   const [swaps, setSwaps] = useState<Record<string, string>>({});
   const [chooserOpen, setChooserOpen] = useState(false);
   const [addPlaceOpen, setAddPlaceOpen] = useState(false);
-  const [userStops, setUserStops] = useState<UserStop[]>([]);
+  const { stops: userStops, refresh: refreshUserStops } = useUserStops();
 
   useEffect(() => {
     loadSwaps().then(setSwaps);
-    loadUserStops().then(setUserStops);
   }, []);
 
   // Merge canonical day stops with any user-added stops for the same day,
@@ -144,10 +143,7 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
         dayId={day.id}
         dayDate={day.date}
         defaultStartHHMM={fmtHHMM(now)}
-        onSaved={async () => {
-          const fresh = await loadUserStops();
-          setUserStops(fresh);
-        }}
+        onSaved={refreshUserStops}
       />
 
       <CaptureSheet

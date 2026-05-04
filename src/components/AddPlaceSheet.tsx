@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BottomSheet } from "./BottomSheet";
 import { addUserStop, type UserStop } from "../lib/userStops";
+import { pushUserStop } from "../lib/sync";
+import { useAuth } from "../hooks/useAuth";
 import type { StopKind } from "../data/itinerary";
 
 const KINDS: { id: StopKind; label: string }[] = [
@@ -24,6 +26,7 @@ type Props = {
 };
 
 export function AddPlaceSheet({ open, onClose, dayId, dayDate, defaultStartHHMM, onSaved }: Props) {
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [address, setAddress] = useState("");
@@ -58,6 +61,13 @@ export function AddPlaceSheet({ open, onClose, dayId, dayDate, defaultStartHHMM,
       note: note.trim() || undefined,
     };
     await addUserStop(stop);
+    // Mirror to Supabase if signed in. Fire-and-forget — local save is what
+    // the user feels; the cloud copy follows in the background.
+    if (user) {
+      void pushUserStop(stop, user.id).catch((err) => {
+        console.error("[sync] pushUserStop failed:", err);
+      });
+    }
     onSaved();
     onClose();
   }

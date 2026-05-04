@@ -6,6 +6,8 @@ import type { Stop } from "../data/itinerary";
 export type UserStop = Stop & {
   dayId: string;
   createdAt: number;
+  // Sync metadata — true once the row exists on Supabase
+  synced?: boolean;
 };
 
 const KEY = "user-stops-v1";
@@ -27,4 +29,13 @@ export async function addUserStop(s: UserStop): Promise<void> {
 export async function deleteUserStop(id: string): Promise<void> {
   const all = await loadUserStops();
   await saveUserStops(all.filter((s) => s.id !== id));
+}
+
+export async function markUserStopSynced(id: string): Promise<void> {
+  const all = await loadUserStops();
+  const i = all.findIndex((s) => s.id === id);
+  if (i >= 0) {
+    all[i] = { ...all[i], synced: true };
+    await saveUserStops(all);
+  }
 }
