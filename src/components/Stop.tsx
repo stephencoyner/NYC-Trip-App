@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Stop as StopT, Day } from "../data/itinerary";
 import { Capture, getBlob } from "../lib/storage";
 import { fmtTimeMono24 } from "../lib/time";
@@ -7,7 +7,7 @@ import { blobToFile, canShareFiles, captureFilename, shareFiles } from "../lib/p
 import { PhotoFrame } from "./PhotoFrame";
 import { MapSnippet } from "./MapSnippet";
 import { StarFixed } from "./StarRating";
-import { SaveIcon } from "./icons";
+import { PauseIcon, PlayIcon, SaveIcon } from "./icons";
 
 type State = "past" | "current" | "future";
 
@@ -158,7 +158,7 @@ function CaptureCard({ c }: { c: Capture }) {
 
   return (
     <div className="space-y-1">
-      <PhotoFrame blobKey={c.photoBlobKey} ratio="square" />
+      {c.photoBlobKey && <PhotoFrame blobKey={c.photoBlobKey} ratio="square" />}
       <div className="flex items-center justify-between">
         {c.rating !== undefined ? <StarFixed value={c.rating} /> : <span />}
         <div className="flex items-center gap-2">
@@ -180,6 +180,73 @@ function CaptureCard({ c }: { c: Capture }) {
       {c.note && (
         <p className="font-serif italic text-[13.5px] leading-snug text-ink-2">{c.note}</p>
       )}
+      {c.voiceBlobKey && <VoicePlayer blobKey={c.voiceBlobKey} />}
+    </div>
+  );
+}
+
+function VoicePlayer({ blobKey }: { blobKey: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [duration, setDuration] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    let revoked: string | undefined;
+    let cancelled = false;
+    getBlob(blobKey).then((blob) => {
+      if (cancelled) return;
+      if (blob) {
+        const u = URL.createObjectURL(blob);
+        revoked = u;
+        setUrl(u);
+      }
+    });
+    return () => {
+      cancelled = true;
+      if (revoked) URL.revokeObjectURL(revoked);
+    };
+  }, [blobKey]);
+
+  function toggle() {
+    const el = audioRef.current;
+    if (!el) return;
+    if (playing) el.pause();
+    else el.play().catch((err) => console.error("[voice] playback failed:", err));
+  }
+
+  if (!url) return null;
+
+  const dur =
+    duration && isFinite(duration)
+      ? `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, "0")}`
+      : "";
+
+  return (
+    <div className="mt-1 inline-flex items-center gap-2">
+      <audio
+        ref={audioRef}
+        src={url}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        onLoadedMetadata={(e) => setDuration((e.currentTarget as HTMLAudioElement).duration)}
+        preload="metadata"
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={playing ? "Pause voice memo" : "Play voice memo"}
+        className={[
+          "flex h-7 w-7 items-center justify-center rounded-full ring-1 transition-colors duration-150 ease-ios active:scale-95",
+          playing ? "ring-accent text-accent" : "ring-ink/40 text-ink",
+        ].join(" ")}
+      >
+        {playing ? <PauseIcon size={11} /> : <PlayIcon size={11} className="ml-[1px]" />}
+      </button>
+      <span className="font-mono text-[11px] text-ink-2 leading-none">
+        voice memo{dur && ` · ${dur}`}
+      </span>
     </div>
   );
 }

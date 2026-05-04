@@ -58,5 +58,12 @@ export function useCaptures() {
     [captures, persist]
   );
 
-  return { captures, ready, add, remove, update };
+  // Re-read from IndexedDB. Called after a CaptureSheet save so the new
+  // entry shows up immediately without a manual refresh.
+  const refresh = useCallback(async () => {
+    const fresh = await loadCaptures();
+    setCaptures(fresh);
+  }, []);
+
+  return { captures, ready, add, remove, update, refresh };
 }

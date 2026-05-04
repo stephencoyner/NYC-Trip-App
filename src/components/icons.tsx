@@ -84,6 +84,19 @@ export const SaveIcon = ({ size = 14, className, strokeWidth }: Props) => (
   </svg>
 );
 
+export const PlayIcon = ({ size = 12, className }: Props) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <path d="M8 5l12 7-12 7z" />
+  </svg>
+);
+
+export const PauseIcon = ({ size = 12, className }: Props) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
+    <rect x="7" y="5" width="3.5" height="14" rx="0.5" />
+    <rect x="13.5" y="5" width="3.5" height="14" rx="0.5" />
+  </svg>
+);
+
 export const ChevronLeft = ({ size = 16, className, strokeWidth }: Props) => (
   <svg viewBox="0 0 24 24" width={size} height={size} className={className} {...base(strokeWidth)}>
     <path d="M15 5l-7 7 7 7" />

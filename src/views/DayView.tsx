@@ -25,7 +25,7 @@ type Props = {
 export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, onOpenRecap, onOpenAuth }: Props) {
   const day = DAYS[activeDayIndex];
   const isToday = activeDayIndex === todayIndex;
-  const { captures } = useCaptures();
+  const { captures, refresh: refreshCaptures } = useCaptures();
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureStop, setCaptureStop] = useState<Stop | undefined>();
@@ -151,9 +151,7 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
         onClose={() => setCaptureOpen(false)}
         stop={captureStop}
         dayId={day.id}
-        onSaved={() => {
-          // captures hook re-fetches via state; nothing else to do.
-        }}
+        onSaved={refreshCaptures}
       />
 
       <SwapSheet
