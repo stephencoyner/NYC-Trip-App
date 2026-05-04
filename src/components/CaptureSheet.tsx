@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Stop } from "../data/itinerary";
-import { Capture, addCapture, putBlob, pushRecentMoods, loadRecentMoods, loadSettings, saveSettings, requestPersistentStorage } from "../lib/storage";
-import { pushCapture } from "../lib/sync";
+import { Capture, addCapture, deleteCapture, getBlob, putBlob, pushRecentMoods, loadRecentMoods, loadSettings, saveSettings, requestPersistentStorage, updateCapture, del } from "../lib/storage";
+import { deleteCaptureRemote, pushCapture } from "../lib/sync";
 import { useAuth } from "../hooks/useAuth";
 import { BottomSheet } from "./BottomSheet";
 import { StarRating } from "./StarRating";
@@ -15,10 +15,11 @@ type Props = {
   onClose: () => void;
   stop?: Stop;
   dayId?: string;
+  editing?: Capture;
   onSaved: () => void;
 };
 
-export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
+export function CaptureSheet({ open, onClose, stop, dayId, editing, onSaved }: Props) {
   const { user } = useAuth();
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -35,21 +36,42 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
   const recRef = useRef<MediaRecorder | null>(null);
   const recChunks = useRef<BlobPart[]>([]);
 
+  const isEdit = !!editing;
+
   useEffect(() => {
     if (!open) return;
-    setPhotoBlob(null);
     setPhotoUrl((u) => {
       if (u) URL.revokeObjectURL(u);
       return null;
     });
-    setNote("");
-    setRating(0);
-    setMoods([]);
-    setVoiceBlob(null);
-    setCompanions([]);
     loadRecentMoods().then(setRecent);
     loadSettings().then((s) => setAllCompanions(s.companions));
-  }, [open]);
+
+    if (editing) {
+      setNote(editing.note ?? "");
+      setRating(editing.rating ?? 0);
+      setMoods(editing.moods ?? []);
+      setCompanions(editing.companions ?? []);
+      setPhotoBlob(null);
+      setVoiceBlob(null);
+      if (editing.photoBlobKey) {
+        getBlob(editing.photoBlobKey).then((blob) => {
+          if (!blob) return;
+          setPhotoUrl((u) => {
+            if (u) URL.revokeObjectURL(u);
+            return URL.createObjectURL(blob);
+          });
+        });
+      }
+    } else {
+      setPhotoBlob(null);
+      setNote("");
+      setRating(0);
+      setMoods([]);
+      setVoiceBlob(null);
+      setCompanions([]);
+    }
+  }, [open, editing]);
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -150,6 +172,33 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
 
   async function save() {
     if (!stop || !dayId) return;
+
+    if (editing) {
+      const patch: Partial<Capture> = {
+        note: note.trim() || undefined,
+        rating: rating || undefined,
+        moods: moods.length ? moods : undefined,
+        companions: companions.length ? companions : undefined,
+      };
+      if (photoBlob && editing.photoBlobKey) {
+        await putBlob(editing.photoBlobKey, photoBlob);
+      }
+      if (voiceBlob && editing.voiceBlobKey) {
+        await putBlob(editing.voiceBlobKey, voiceBlob);
+      }
+      await updateCapture(editing.id, patch);
+      if (moods.length) await pushRecentMoods(moods);
+      if (user) {
+        void pushCapture({ ...editing, ...patch }, user.id).catch((err) => {
+          console.error("[sync] pushCapture failed:", err);
+        });
+      }
+      if ("vibrate" in navigator) navigator.vibrate?.(8);
+      onSaved();
+      onClose();
+      return;
+    }
+
     const id = `c_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const photoKey = photoBlob ? `photo_${id}` : undefined;
     const voiceKey = voiceBlob ? `voice_${id}` : undefined;
@@ -197,6 +246,22 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
     onClose();
   }
 
+  async function remove() {
+    if (!editing) return;
+    if (!window.confirm("Delete this entry? This can't be undone.")) return;
+    await deleteCapture(editing.id);
+    if (editing.photoBlobKey) await del(editing.photoBlobKey).catch(() => {});
+    if (editing.voiceBlobKey) await del(editing.voiceBlobKey).catch(() => {});
+    if (user) {
+      void deleteCaptureRemote(editing, user.id).catch((err) => {
+        console.error("[sync] deleteCaptureRemote failed:", err);
+      });
+    }
+    if ("vibrate" in navigator) navigator.vibrate?.(8);
+    onSaved();
+    onClose();
+  }
+
   const canSave = !!photoBlob || note.trim().length > 0 || rating > 0 || moods.length > 0 || !!voiceBlob;
 
   return (
@@ -205,23 +270,37 @@ export function CaptureSheet({ open, onClose, stop, dayId, onSaved }: Props) {
       onClose={onClose}
       title={
         <span>
-          A small thing about <em className="not-italic font-serif text-ink">{stop?.title ?? "this stop"}</em>
+          {isEdit ? (
+            <>Edit your note on <em className="not-italic font-serif text-ink">{stop?.title ?? "this stop"}</em></>
+          ) : (
+            <>A small thing about <em className="not-italic font-serif text-ink">{stop?.title ?? "this stop"}</em></>
+          )}
         </span>
       }
       height="min(88vh, 800px)"
       footer={
-        <button
-          onClick={save}
-          disabled={!canSave}
-          className={[
-            "block w-full py-3.5 text-center font-serif text-[18px] tracking-tight transition-colors duration-150 ease-ios",
-            canSave
-              ? "bg-ink text-paper active:bg-ink/90"
-              : "bg-paper-2 text-ink-2/60 cursor-not-allowed",
-          ].join(" ")}
-        >
-          Save this entry
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={save}
+            disabled={!canSave}
+            className={[
+              "block w-full py-3.5 text-center font-serif text-[18px] tracking-tight transition-colors duration-150 ease-ios",
+              canSave
+                ? "bg-ink text-paper active:bg-ink/90"
+                : "bg-paper-2 text-ink-2/60 cursor-not-allowed",
+            ].join(" ")}
+          >
+            {isEdit ? "Save changes" : "Save this entry"}
+          </button>
+          {isEdit && (
+            <button
+              onClick={remove}
+              className="block w-full py-2 text-center font-serif text-[15px] text-accent active:opacity-70"
+            >
+              Delete
+            </button>
+          )}
+        </div>
       }
     >
       <input

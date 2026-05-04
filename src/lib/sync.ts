@@ -82,6 +82,26 @@ export async function pushCapture(cap: Capture, userId: string): Promise<void> {
   await updateCapture(cap.id, { photoPath, voicePath, synced: true });
 }
 
+export async function deleteCaptureRemote(cap: Capture, userId: string): Promise<void> {
+  if (!supabase) return;
+
+  const paths = [cap.photoPath, cap.voicePath].filter((p): p is string => !!p);
+  if (paths.length) {
+    const { error } = await supabase.storage.from(BUCKET).remove(paths);
+    if (error) console.error("[sync] capture media delete failed:", error);
+  }
+
+  const { error } = await supabase
+    .from("captures")
+    .delete()
+    .eq("id", cap.id)
+    .eq("user_id", userId);
+  if (error) {
+    console.error("[sync] captures delete failed:", error);
+    throw error;
+  }
+}
+
 export async function pullCaptures(userId: string): Promise<number> {
   if (!supabase) return 0;
 

@@ -29,6 +29,7 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureStop, setCaptureStop] = useState<Stop | undefined>();
+  const [editingCapture, setEditingCapture] = useState<Capture | undefined>();
   const [swapStop, setSwapStop] = useState<Stop | undefined>();
   const [swaps, setSwaps] = useState<Record<string, string>>({});
   const [chooserOpen, setChooserOpen] = useState(false);
@@ -110,6 +111,13 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
         isToday={isToday}
         captures={captures}
         onOpenSwap={(s) => setSwapStop(s)}
+        onEditCapture={(c) => {
+          const stop = mergedDay.stops.find((s) => s.id === c.stopId);
+          if (!stop) return;
+          setCaptureStop(stop);
+          setEditingCapture(c);
+          setCaptureOpen(true);
+        }}
       />
 
       {/* Recap link, only on or after the last day */}
@@ -133,6 +141,7 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
         onChooseCapture={() => {
           setChooserOpen(false);
           setCaptureStop(relevantStop);
+          setEditingCapture(undefined);
           setCaptureOpen(true);
         }}
       />
@@ -148,9 +157,13 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
 
       <CaptureSheet
         open={captureOpen}
-        onClose={() => setCaptureOpen(false)}
+        onClose={() => {
+          setCaptureOpen(false);
+          setEditingCapture(undefined);
+        }}
         stop={captureStop}
         dayId={day.id}
+        editing={editingCapture}
         onSaved={refreshCaptures}
       />
 

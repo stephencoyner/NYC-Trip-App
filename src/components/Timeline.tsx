@@ -11,9 +11,10 @@ type Props = {
   isToday: boolean;
   captures: Capture[];
   onOpenSwap?: (s: StopT) => void;
+  onEditCapture?: (c: Capture) => void;
 };
 
-export function Timeline({ day, now, isToday, captures, onOpenSwap }: Props) {
+export function Timeline({ day, now, isToday, captures, onOpenSwap, onEditCapture }: Props) {
   const items = day.stops.map((s) => ({
     stop: s,
     start: parseNY(s.start),
@@ -52,6 +53,7 @@ export function Timeline({ day, now, isToday, captures, onOpenSwap }: Props) {
                 endDate={end}
                 captures={stopCaptures}
                 onOpenSwap={onOpenSwap}
+                onEditCapture={onEditCapture}
               />
 
               {/* Now-line, drawn at the bottom of the current stop (so it sits inside its block) */}
