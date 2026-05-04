@@ -7,13 +7,19 @@ type Props = {
   onSelect: (i: number) => void;
 };
 
+// Vertical math: center-aligned with the FAB.
+// FAB bottom = safe-area + 16px, height 56  → center at safe-area + 44.
+// Pip bottom = safe-area + 30px, height 28  → center at safe-area + 44.
+const PIPS_BOTTOM = "calc(env(safe-area-inset-bottom, 0px) + 30px)";
+
 export function DayPips({ active, todayIndex, onSelect }: Props) {
   return (
     <nav
       aria-label="Day"
-      className="no-print fixed bottom-0 inset-x-0 z-30 flex justify-center pb-[max(env(safe-area-inset-bottom),12px)] pt-3"
+      className="no-print fixed left-1/2 -translate-x-1/2 z-30"
+      style={{ bottom: PIPS_BOTTOM }}
     >
-      <div className="flex h-7 items-center gap-3 rounded-full bg-paper/80 px-4 backdrop-blur-[2px]">
+      <div className="flex h-7 items-center gap-3 rounded-full bg-paper px-4 ring-1 ring-ink/70">
         {DAYS.map((d, i) => {
           const isToday = i === todayIndex;
           const isActive = i === active;

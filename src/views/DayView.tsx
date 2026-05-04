@@ -2,12 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Day, DAYS, Stop } from "../data/itinerary";
 import { Capture, clearSwap, loadSwaps, saveSwap } from "../lib/storage";
 import { dayKey, parseNY } from "../lib/time";
+import { loadUserStops, type UserStop } from "../lib/userStops";
 import { Masthead } from "../components/Masthead";
 import { Timeline } from "../components/Timeline";
 import { NowBar } from "../components/NowBar";
 import { CaptureFAB } from "../components/CaptureFAB";
 import { CaptureSheet } from "../components/CaptureSheet";
 import { SwapSheet } from "../components/SwapSheet";
+import { AddChooserSheet } from "../components/AddChooserSheet";
+import { AddPlaceSheet } from "../components/AddPlaceSheet";
 import { useCaptures } from "../hooks/useCaptures";
 
 type Props = {
@@ -22,27 +25,49 @@ type Props = {
 export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, onOpenRecap, onOpenAuth }: Props) {
   const day = DAYS[activeDayIndex];
   const isToday = activeDayIndex === todayIndex;
-  const { captures, add: _addCap } = useCaptures();
-  void _addCap;
+  const { captures } = useCaptures();
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureStop, setCaptureStop] = useState<Stop | undefined>();
   const [swapStop, setSwapStop] = useState<Stop | undefined>();
   const [swaps, setSwaps] = useState<Record<string, string>>({});
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const [addPlaceOpen, setAddPlaceOpen] = useState(false);
+  const [userStops, setUserStops] = useState<UserStop[]>([]);
 
   useEffect(() => {
     loadSwaps().then(setSwaps);
+    loadUserStops().then(setUserStops);
   }, []);
 
-  // Pick the stop most relevant to the moment for capture.
+  // Merge canonical day stops with any user-added stops for the same day,
+  // sorted chronologically. The Timeline and NowBar both render off this.
+  const mergedDay: Day = useMemo(() => {
+    const userForThisDay = userStops.filter((s) => s.dayId === day.id);
+    if (userForThisDay.length === 0) return day;
+    return {
+      ...day,
+      stops: [...day.stops, ...userForThisDay].sort((a, b) =>
+        a.start.localeCompare(b.start)
+      ),
+    };
+  }, [day, userStops]);
+
+  // Pick the stop most relevant to the moment for capture context.
   const relevantStop = useMemo<Stop | undefined>(() => {
-    if (!isToday) return day.stops[0];
-    const items = day.stops.map((s) => ({ s, start: parseNY(s.start), end: s.end ? parseNY(s.end) : undefined }));
-    const cur = items.find(({ start, end }) => now >= start && now <= (end ?? new Date(start.getTime() + 30 * 60_000)));
+    if (!isToday) return mergedDay.stops[0];
+    const items = mergedDay.stops.map((s) => ({
+      s,
+      start: parseNY(s.start),
+      end: s.end ? parseNY(s.end) : undefined,
+    }));
+    const cur = items.find(
+      ({ start, end }) => now >= start && now <= (end ?? new Date(start.getTime() + 30 * 60_000))
+    );
     if (cur) return cur.s;
     const past = items.slice().reverse().find(({ start }) => start <= now);
     return past?.s ?? items[0]?.s;
-  }, [day, isToday, now]);
+  }, [mergedDay, isToday, now]);
 
   // Day-swipe gestures.
   const touchX = useRef<number | null>(null);
@@ -78,10 +103,10 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
         </p>
       )}
 
-      {isToday && <NowBar day={day} now={now} />}
+      {isToday && <NowBar day={mergedDay} now={now} />}
 
       <Timeline
-        day={day}
+        day={mergedDay}
         now={now}
         isToday={isToday}
         captures={captures}
@@ -97,10 +122,31 @@ export function DayView({ now, activeDayIndex, setActiveDayIndex, todayIndex, on
         </div>
       )}
 
-      <CaptureFAB
-        onClick={() => {
+      <CaptureFAB onClick={() => setChooserOpen(true)} />
+
+      <AddChooserSheet
+        open={chooserOpen}
+        onClose={() => setChooserOpen(false)}
+        onChoosePlace={() => {
+          setChooserOpen(false);
+          setAddPlaceOpen(true);
+        }}
+        onChooseCapture={() => {
+          setChooserOpen(false);
           setCaptureStop(relevantStop);
           setCaptureOpen(true);
+        }}
+      />
+
+      <AddPlaceSheet
+        open={addPlaceOpen}
+        onClose={() => setAddPlaceOpen(false)}
+        dayId={day.id}
+        dayDate={day.date}
+        defaultStartHHMM={fmtHHMM(now)}
+        onSaved={async () => {
+          const fresh = await loadUserStops();
+          setUserStops(fresh);
         }}
       />
 
@@ -145,6 +191,12 @@ function greetingFor(now: Date): string {
   if (h < 17) return "The afternoon.";
   if (h < 19) return "Golden hour, if there is one.";
   return "Tonight.";
+}
+
+function fmtHHMM(d: Date): string {
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
 }
 
 function relativeLabel(activeDate: string, now: Date): string {

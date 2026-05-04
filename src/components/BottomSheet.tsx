@@ -6,10 +6,14 @@ type Props = {
   onClose: () => void;
   title?: React.ReactNode;
   children: React.ReactNode;
-  height?: string; // e.g., "min(70vh, 640px)"
-  /** Slot rendered as a sticky action bar at the bottom of the sheet (e.g., a big Save). */
+  height?: string; // CSS value: "min(72vh, 720px)" or "auto"
   footer?: React.ReactNode;
 };
+
+function isInteractive(t: EventTarget | null): boolean {
+  if (!t || !(t instanceof HTMLElement)) return false;
+  return !!t.closest("button, a, input, textarea, select, label, [role='slider']");
+}
 
 export function BottomSheet({
   open,
@@ -21,10 +25,17 @@ export function BottomSheet({
 }: Props) {
   const [drag, setDrag] = useState(0);
   const startY = useRef<number | null>(null);
+  const lastY = useRef<number | null>(null);
+  const lastT = useRef<number>(0);
+  const velocity = useRef<number>(0);
+  const draggingRef = useRef<boolean>(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const startScrollTop = useRef<number>(0);
 
   useEffect(() => {
     if (!open) {
       setDrag(0);
+      draggingRef.current = false;
       return;
     }
     const onKey = (e: KeyboardEvent) => {
@@ -34,19 +45,81 @@ export function BottomSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  function handleStart(e: React.PointerEvent) {
-    startY.current = e.clientY;
+  function startDrag(clientY: number) {
+    startY.current = clientY;
+    lastY.current = clientY;
+    lastT.current = performance.now();
+    velocity.current = 0;
+    draggingRef.current = true;
   }
-  function handleMove(e: React.PointerEvent) {
-    if (startY.current == null) return;
-    const dy = e.clientY - startY.current;
+
+  function moveDrag(clientY: number) {
+    if (!draggingRef.current || startY.current == null) return;
+    const dy = clientY - startY.current;
     if (dy > 0) setDrag(dy);
+    const now = performance.now();
+    if (lastT.current && lastY.current != null) {
+      const dt = Math.max(1, now - lastT.current);
+      velocity.current = (clientY - lastY.current) / dt;
+    }
+    lastY.current = clientY;
+    lastT.current = now;
   }
-  function handleEnd() {
-    if (drag > 120) onClose();
+
+  function endDrag() {
+    if (!draggingRef.current) return;
+    const fastFlick = drag > 30 && velocity.current > 0.5;
+    if (drag > 120 || fastFlick) {
+      onClose();
+    }
     setDrag(0);
     startY.current = null;
+    lastY.current = null;
+    velocity.current = 0;
+    draggingRef.current = false;
   }
+
+  // Header drag: any non-interactive area in the pinned top region.
+  const headerHandlers = {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (isInteractive(e.target)) return;
+      startDrag(e.clientY);
+    },
+    onPointerMove: (e: React.PointerEvent) => moveDrag(e.clientY),
+    onPointerUp: endDrag,
+    onPointerCancel: endDrag,
+  };
+
+  // Content drag: only kicks in if the scroll position is at the top
+  // and the user is pulling down. Otherwise native scroll wins.
+  const contentHandlers = {
+    onTouchStart: (e: React.TouchEvent) => {
+      const el = scrollRef.current;
+      startScrollTop.current = el?.scrollTop ?? 0;
+      // Only arm a potential drag if we're already at the top.
+      if (startScrollTop.current <= 0) {
+        startDrag(e.touches[0].clientY);
+      } else {
+        draggingRef.current = false;
+      }
+    },
+    onTouchMove: (e: React.TouchEvent) => {
+      // If scroll moved away from top mid-gesture, abandon drag and
+      // let native scroll continue.
+      const el = scrollRef.current;
+      if ((el?.scrollTop ?? 0) > 0) {
+        draggingRef.current = false;
+        startY.current = null;
+        setDrag(0);
+        return;
+      }
+      moveDrag(e.touches[0].clientY);
+    },
+    onTouchEnd: endDrag,
+    onTouchCancel: endDrag,
+  };
+
+  const isAuto = height === "auto";
 
   return (
     <div
@@ -66,22 +139,19 @@ export function BottomSheet({
         aria-modal="true"
         className="absolute inset-x-0 bottom-0 flex flex-col bg-paper ring-1 ring-rule/70 transition-transform duration-220 ease-ios"
         style={{
-          height,
+          height: isAuto ? "auto" : height,
+          maxHeight: isAuto ? "min(82vh, 760px)" : undefined,
           transform: open ? `translateY(${drag}px)` : "translateY(100%)",
           borderTopLeftRadius: 14,
           borderTopRightRadius: 14,
         }}
       >
-        {/* Pinned top region: drag handle + title + close button.
-            shrink-0 keeps it from collapsing when content overflows. */}
-        <div className="shrink-0 bg-paper border-b border-rule/40">
-          <div
-            onPointerDown={handleStart}
-            onPointerMove={handleMove}
-            onPointerUp={handleEnd}
-            onPointerCancel={handleEnd}
-            className="flex flex-col items-center pt-3 pb-1 cursor-grab touch-none select-none"
-          >
+        {/* Pinned top region: drag handle + title + close */}
+        <div
+          {...headerHandlers}
+          className="shrink-0 bg-paper border-b border-rule/40 cursor-grab touch-none select-none"
+        >
+          <div className="flex flex-col items-center pt-3 pb-1">
             <div className="h-1 w-9 rounded-full bg-rule" />
           </div>
 
@@ -103,9 +173,12 @@ export function BottomSheet({
           </div>
         </div>
 
-        {/* Scrollable content. min-h-0 is required for flex-1 + overflow-y-auto
-            to actually scroll instead of pushing siblings off-screen. */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4">
+        {/* Scrollable content */}
+        <div
+          ref={scrollRef}
+          {...contentHandlers}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4"
+        >
           {children}
         </div>
 
