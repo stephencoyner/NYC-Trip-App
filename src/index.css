@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light only;
+  --paper: #f4ede0;
+  --paper-2: #ebe2d2;
+  --ink: #1f1b16;
+  --ink-2: #5c5247;
+  --rule: #c9bea8;
+  --accent: #9a2a1f;
+  --accent-soft: #c8a26b;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overscroll-behavior-y: none;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv01", "cv02";
+}
+
+/* Paper grain — invisible until you look. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.10 0 0 0 0 0.08 0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  mix-blend-mode: multiply;
+  opacity: 0.07;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Selection */
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* Hide scrollbars on horizontal chip rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Print stylesheet for the recap. */
+@media print {
+  body::before {
+    display: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    page-break-after: always;
+  }
+}
+
+/* Buttons that look like text. */
+.btn-text {
+  font-family: "Inter Tight", sans-serif;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 1px;
+  color: var(--ink);
+  background: transparent;
+}
+
+/* Small caps mono utility */
+.smallcaps {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+
+/* Dashed timeline spine */
+.spine {
+  background-image: linear-gradient(
+    to bottom,
+    var(--rule) 0,
+    var(--rule) 3px,
+    transparent 3px,
+    transparent 7px
+  );
+  background-size: 1px 7px;
+  background-repeat: repeat-y;
+}
+
+/* Ticket perforation along the bottom edge of a card. */
+.perforated-bottom {
+  -webkit-mask-image: radial-gradient(circle 5px at 5px 100%, transparent 4px, #000 4.5px),
+    linear-gradient(#000, #000);
+  -webkit-mask-size: 12px 12px, 100% calc(100% - 12px);
+  -webkit-mask-position: bottom left, top left;
+  -webkit-mask-repeat: repeat-x, no-repeat;
+  -webkit-mask-composite: source-over;
+}
