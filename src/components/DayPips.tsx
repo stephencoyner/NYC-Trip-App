@@ -13,7 +13,7 @@ export function DayPips({ active, todayIndex, onSelect }: Props) {
       aria-label="Day"
       className="no-print fixed bottom-0 inset-x-0 z-30 flex justify-center pb-[max(env(safe-area-inset-bottom),12px)] pt-3"
     >
-      <div className="flex items-center gap-3 rounded-full bg-paper/80 px-4 py-2 backdrop-blur-[2px]">
+      <div className="flex h-7 items-center gap-3 rounded-full bg-paper/80 px-4 backdrop-blur-[2px]">
         {DAYS.map((d, i) => {
           const isToday = i === todayIndex;
           const isActive = i === active;
@@ -22,7 +22,7 @@ export function DayPips({ active, todayIndex, onSelect }: Props) {
               key={d.id}
               onClick={() => onSelect(i)}
               aria-label={`${d.weekday}, ${d.ordinal}`}
-              className="relative flex h-9 w-7 items-center justify-center"
+              className="relative flex h-7 w-6 items-center justify-center"
             >
               <span
                 className={[

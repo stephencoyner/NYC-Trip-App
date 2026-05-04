@@ -29,7 +29,6 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
     <article
       className={[
         "relative pl-[76px] pr-5 py-5",
-        dim ? "opacity-55" : "",
       ].join(" ")}
     >
       {/* Spine node circle */}
@@ -52,12 +51,12 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
       )}
 
       {/* Time block — left gutter, right-aligned, with breathing room before the spine */}
-      <div className="absolute left-3 top-5 w-[44px] text-right whitespace-nowrap">
-        <div className="font-mono text-[11px] tracking-tight text-ink-2">
+      <div className="absolute left-1 top-5 w-[44px] text-right whitespace-nowrap">
+        <div className={["font-mono text-[11px] tracking-tight", dim ? "text-ink-2/60" : "text-ink-2"].join(" ")}>
           {fmtTimeMono24(startDate)}
         </div>
         {endDate && (
-          <div className="font-mono text-[10px] text-ink-2/70">
+          <div className={["font-mono text-[10px]", dim ? "text-ink-2/40" : "text-ink-2/70"].join(" ")}>
             {fmtTimeMono24(endDate)}
           </div>
         )}
@@ -65,7 +64,7 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
 
       <header className="flex items-baseline justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-serif text-[22px] leading-[1.15] tracking-tight">
+          <h2 className={["font-serif text-[22px] leading-[1.15] tracking-tight", dim ? "text-ink-2" : "text-ink"].join(" ")}>
             {stop.title}
           </h2>
           <div className="mt-1 smallcaps text-ink-2/90">
@@ -98,7 +97,7 @@ export function Stop({ stop, state, startDate, endDate, captures, onOpenSwap }: 
       </header>
 
       {stop.note && (
-        <p className="mt-3 font-serif italic text-[16.5px] leading-[1.5] text-ink max-w-[34ch]">
+        <p className={["mt-3 font-serif italic text-[16.5px] leading-[1.5] max-w-[34ch]", dim ? "text-ink-2/70" : "text-ink"].join(" ")}>
           {stop.note}
         </p>
       )}
